@@ -1,6 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
 
 const dbPath = path.resolve(__dirname, '../database/stock_management.db');
@@ -13,14 +12,7 @@ const initializeDatabase = () => {
     if (db) {
         return db;
     }
-
-    // Ensure database directory exists
-    const dbDir = path.dirname(dbPath);
-    if (!fs.existsSync(dbDir)) {
-        console.log('📁 Creating database directory:', dbDir);
-        fs.mkdirSync(dbDir, { recursive: true });
-    }
-
+    
     db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
         if (err) {
             console.error('Error opening database:', err);
@@ -28,14 +20,14 @@ const initializeDatabase = () => {
         }
         console.log('Connected to SQLite database');
     });
-
+    
     // Enable WAL mode for better concurrency
     db.exec('PRAGMA journal_mode = WAL;');
     db.exec('PRAGMA synchronous = NORMAL;');
     db.exec('PRAGMA cache_size = 1000000;');
     db.exec('PRAGMA foreign_keys = ON;');
     db.exec('PRAGMA temp_store = MEMORY;');
-
+    
     return db;
 };
 
@@ -66,7 +58,7 @@ const runQuery = (query, params = []) => {
     return retryOperation(() => {
         return new Promise((resolve, reject) => {
             const db = createConnection();
-            db.run(query, params, function (err) {
+            db.run(query, params, function(err) {
                 if (err) {
                     reject(err);
                 } else {
@@ -114,7 +106,7 @@ const runTransaction = async (queries) => {
     return retryOperation(() => {
         return new Promise((resolve, reject) => {
             const db = createConnection();
-
+            
             db.serialize(() => {
                 db.run('BEGIN IMMEDIATE TRANSACTION', (err) => {
                     if (err) {
@@ -122,10 +114,10 @@ const runTransaction = async (queries) => {
                         return;
                     }
                 });
-
+                
                 const results = [];
                 let hasError = false;
-
+                
                 const processQuery = (index) => {
                     if (index >= queries.length) {
                         if (hasError) {
@@ -139,9 +131,9 @@ const runTransaction = async (queries) => {
                         }
                         return;
                     }
-
+                    
                     const { query, params } = queries[index];
-                    db.run(query, params, function (err) {
+                    db.run(query, params, function(err) {
                         if (err) {
                             hasError = true;
                             db.run('ROLLBACK', () => {
@@ -149,12 +141,12 @@ const runTransaction = async (queries) => {
                             });
                             return;
                         }
-
+                        
                         results.push({ id: this.lastID, changes: this.changes });
                         processQuery(index + 1);
                     });
                 };
-
+                
                 processQuery(0);
             });
         });
