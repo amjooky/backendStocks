@@ -31,7 +31,6 @@ router.post('/reset-database', async (req, res) => {
         }
 
         console.log('🚀 Starting Database Reset via API...');
-        // Note: Using the one in backend/resetVapeStore as it is the most complete
         await resetVapeStoreDatabase();
 
         res.status(200).json({
