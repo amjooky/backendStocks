@@ -1,14 +1,20 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const fs = require('fs');
 
 const dbPath = path.join(__dirname, 'database', 'stock_management.db');
+
+// Ensure database directory exists before opening
+const dbDir = path.dirname(dbPath);
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+}
+
 const db = new sqlite3.Database(dbPath);
 
 // Enable WAL mode for better concurrency
 db.run('PRAGMA journal_mode=WAL');
 db.run('PRAGMA synchronous=NORMAL');
-
-console.log('🔄 Starting vape store database reset...');
 
 // First, let's see what tables we have
 function examineDatabase() {
@@ -351,6 +357,7 @@ function createPromotions(productIds) {
 
 // Convert to async function if not already and export it
 async function resetVapeStoreDatabase() {
+    console.log('🔄 Starting vape store database reset...');
     return new Promise(async (resolve, reject) => {
         try {
             await examineDatabase();
