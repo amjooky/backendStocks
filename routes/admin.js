@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { resetVapeStoreDatabase } = require('../resetVapeStore');
-const logger = require('./utils/logger');
-const { authenticateToken, requireAdmin } = require('./middleware/auth');
+const logger = require('../utils/logger');
+const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
 // Apply authentication to all admin routes
 router.use(authenticateToken);

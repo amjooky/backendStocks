@@ -172,6 +172,83 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Ensure caisse-related tables/columns exist (idempotent)
+const ensureCaisseTables = async () => {
+    try {
+        console.log('🔧 Ensuring caisse tables are present...');
+        const { getAllRows, runQuery } = require('./config/database');
+
+        // Create caisse_sessions table if it doesn't exist
+        await runQuery(`CREATE TABLE IF NOT EXISTS caisse_sessions (
+            id TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            session_name VARCHAR(100) NOT NULL,
+            opening_amount DECIMAL(10, 2) NOT NULL,
+            current_amount DECIMAL(10, 2) NOT NULL,
+            closing_amount DECIMAL(10, 2),
+            expected_amount DECIMAL(10, 2),
+            difference DECIMAL(10, 2),
+            status TEXT CHECK(status IN ('active', 'closed')) DEFAULT 'active',
+            description TEXT,
+            closing_notes TEXT,
+            opened_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            closed_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Add helpful indexes
+        await runQuery(`CREATE INDEX IF NOT EXISTS idx_caisse_sessions_user ON caisse_sessions (user_id)`);
+        await runQuery(`CREATE INDEX IF NOT EXISTS idx_caisse_sessions_status ON caisse_sessions (status)`);
+
+        // Check if sales table has caisse_session_id column; if not, add it
+        const pragma = await getAllRows(`PRAGMA table_info(sales)`);
+        const hasSessionId = Array.isArray(pragma) && pragma.some(col => col.name === 'caisse_session_id');
+        if (!hasSessionId) {
+            console.log('🧩 Adding caisse_session_id column to sales table...');
+            await runQuery(`ALTER TABLE sales ADD COLUMN caisse_session_id TEXT`);
+        }
+
+        console.log('✅ Caisse tables verified.');
+    } catch (err) {
+        console.error('❌ Failed to ensure caisse tables:', err.message);
+    }
+};
+
+// Ensure notifications table exists (idempotent)
+const ensureNotificationsTable = async () => {
+    try {
+        console.log('🔔 Ensuring notifications table is present...');
+        const { runQuery } = require('./config/database');
+
+        // Create notifications table if it doesn't exist
+        await runQuery(`CREATE TABLE IF NOT EXISTS notifications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            type VARCHAR(50) NOT NULL,
+            title VARCHAR(255),
+            message TEXT NOT NULL,
+            priority VARCHAR(20) DEFAULT 'low',
+            status VARCHAR(20) DEFAULT 'unread',
+            data TEXT,
+            recipient VARCHAR(255),
+            subject VARCHAR(255),
+            read_at DATETIME,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )`);
+
+        // Add helpful indexes
+        await runQuery(`CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications (user_id)`);
+        await runQuery(`CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications (status)`);
+        await runQuery(`CREATE INDEX IF NOT EXISTS idx_notifications_type ON notifications (type)`);
+
+        console.log('✅ Notifications table verified.');
+    } catch (err) {
+        console.error('❌ Failed to ensure notifications table:', err.message);
+    }
+};
+
 // Initialize database and start server
 const startServer = async () => {
     try {
@@ -182,6 +259,12 @@ const startServer = async () => {
         console.log('📊 Initializing database...');
         await autoInitializeDatabase();
         console.log('✅ Database initialization completed');
+
+        // Ensure caisse tables and columns exist
+        await ensureCaisseTables();
+
+        // Ensure notifications table exists
+        await ensureNotificationsTable();
 
         // Start server
         app.listen(PORT, () => {
