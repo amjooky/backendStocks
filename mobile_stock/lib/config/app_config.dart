@@ -1,6 +1,6 @@
 class AppConfig {
   // API configuration
-  static const String apiBaseUrl = 'https://backendstocks.onrender.com/api';
+  static const String apiBaseUrl = 'https://backendstocksfinal.onrender.com/api';
   static const Duration apiTimeout = Duration(seconds: 30);
 
   // App settings

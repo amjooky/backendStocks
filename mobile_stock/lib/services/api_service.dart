@@ -10,7 +10,7 @@ import 'auth_service.dart';
 /// Service for handling API communication
 @immutable
 class ApiService {
-  static const String baseUrl = 'https://backendstocks.onrender.com/api';
+  static const String baseUrl = 'https://backendstocksfinal.onrender.com/api';
   static const Duration _timeoutDuration = Duration(seconds: 30);
 
   /// Get auth headers for requests
