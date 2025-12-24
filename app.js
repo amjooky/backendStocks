@@ -272,10 +272,10 @@ const startServer = async () => {
             console.log(`🚀 Server running on port ${PORT}`);
             console.log(`🔥 ALL API ROUTES ARE LIVE AND WORKING! 🔥`);
             console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-            console.log(`✅ AUTH API: https://backendstocks.onrender.com/api/auth/login`);
-            console.log(`✅ INVENTORY API: https://backendstocks.onrender.com/api/inventory`);
-            console.log(`✅ ANALYTICS API: https://backendstocks.onrender.com/api/analytics`);
-            console.log(`📚 API Documentation: https://backendstocks.onrender.com/api-docs`);
+            console.log(`✅ AUTH API: https://backendstocksfinal.onrender.com/api/auth/login`);
+            console.log(`✅ INVENTORY API: https://backendstocksfinal.onrender.com/api/inventory`);
+            console.log(`✅ ANALYTICS API: https://backendstocksfinal.onrender.com/api/analytics`);
+            console.log(`📚 API Documentation: https://backendstocksfinal.onrender.com/api-docs`);
             console.log(`🎉 DEPLOYMENT COMPLETE - ALL SYSTEMS OPERATIONAL!`);
         });
     } catch (error) {
