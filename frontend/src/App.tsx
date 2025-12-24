@@ -30,6 +30,7 @@ import i18n from './i18n';
 import logger from './services/logger';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LogViewerFAB } from './components/LogViewer';
+import api from './config/api';
 import {
   AppBar,
   Toolbar,
@@ -170,13 +171,13 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <LanguageSelector />
       </Box>
-      
+
       <Container maxWidth="sm">
-        <Paper 
-          elevation={12} 
-          sx={{ 
-            p: 4, 
-            borderRadius: 4, 
+        <Paper
+          elevation={12}
+          sx={{
+            p: 4,
+            borderRadius: 4,
             background: (theme) => `linear-gradient(145deg, 
               ${alpha(theme.palette.background.paper, 0.98)} 0%, 
               ${alpha(theme.palette.background.paper, 0.95)} 100%
@@ -187,9 +188,9 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {/* Logo/Icon */}
-            <Box sx={{ 
-              p: 2, 
-              borderRadius: '50%', 
+            <Box sx={{
+              p: 2,
+              borderRadius: '50%',
               bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
               mb: 2,
               background: (theme) => `linear-gradient(135deg, 
@@ -197,9 +198,9 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
                 ${alpha(theme.palette.primary.light || theme.palette.primary.main, 0.1)} 100%
               )`
             }}>
-              <Avatar sx={{ 
-                width: 56, 
-                height: 56, 
+              <Avatar sx={{
+                width: 56,
+                height: 56,
                 bgcolor: 'primary.main',
                 background: (theme) => `linear-gradient(135deg, 
                   ${theme.palette.primary.main} 0%, 
@@ -209,13 +210,13 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
                 <StoreIcon sx={{ fontSize: 30 }} />
               </Avatar>
             </Box>
-            
+
             {/* App Title */}
-            <Typography 
-              component="h1" 
-              variant="h4" 
-              gutterBottom 
-              sx={{ 
+            <Typography
+              component="h1"
+              variant="h4"
+              gutterBottom
+              sx={{
                 fontWeight: 600,
                 background: (theme) => `linear-gradient(45deg, 
                   ${theme.palette.primary.main} 30%, 
@@ -230,7 +231,7 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
             >
               {t('common.appTitle')}
             </Typography>
-            
+
             {/* Login Title */}
             <Typography component="h2" variant="h5" gutterBottom sx={{ fontWeight: 500 }}>
               {t('login.title')}
@@ -306,15 +307,15 @@ const Login: React.FC<{ onLogin: (credentials: { email: string; password: string
 
 
 // Enhanced Layout Component
-const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; onLogout: () => void }> = ({ 
-  children, 
-  user, 
-  onLogout 
+const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; onLogout: () => void }> = ({
+  children,
+  user,
+  onLogout
 }) => {
   // All hooks must be called at the top level
   const { t } = useTranslation();
   const [drawerOpen, setDrawerOpen] = useState(true);
-  const [expandedMenus, setExpandedMenus] = useState<{[key: string]: boolean}>({});
+  const [expandedMenus, setExpandedMenus] = useState<{ [key: string]: boolean }>({});
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -324,18 +325,18 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
   if (!user) {
     return null;
   }
-  
+
   const drawerWidth = 280;
   const miniDrawerWidth = 70;
-  
+
   // Notifications are now handled by the NotificationCenter component
-  
+
   const menuItems = [
-    { 
-      textKey: 'navigation.dashboard', 
-      icon: <DashboardIcon />, 
-      path: '/', 
-      roles: ['superadmin', 'admin', 'manager', 'cashier'] 
+    {
+      textKey: 'navigation.dashboard',
+      icon: <DashboardIcon />,
+      path: '/',
+      roles: ['superadmin', 'admin', 'manager', 'cashier']
     },
     // Superadmin-only items
     ...(user?.role === 'superadmin' ? [
@@ -353,9 +354,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
         ]
       }
     ] : []),
-    { 
-      textKey: 'navigation.sales', 
-      icon: <ShoppingCartIcon />, 
+    {
+      textKey: 'navigation.sales',
+      icon: <ShoppingCartIcon />,
       path: '/sales',
       roles: ['superadmin', 'admin', 'manager', 'cashier'],
       children: [
@@ -364,9 +365,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
         { textKey: 'navigation.sales', icon: <ReceiptIcon />, path: '/sales', roles: ['superadmin', 'admin', 'manager', 'cashier'] },
       ]
     },
-    { 
-      textKey: 'navigation.inventory', 
-      icon: <InventoryIcon />, 
+    {
+      textKey: 'navigation.inventory',
+      icon: <InventoryIcon />,
       path: '/inventory',
       roles: ['superadmin', 'admin', 'manager'],
       children: [
@@ -374,21 +375,21 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
         { textKey: 'navigation.stockManagement', icon: <StockIcon />, path: '/stock', roles: ['superadmin', 'admin', 'manager'] },
       ]
     },
-    { 
-      textKey: 'navigation.customers', 
-      icon: <PeopleIcon />, 
-      path: '/customers', 
-      roles: ['superadmin', 'admin', 'manager', 'cashier'] 
+    {
+      textKey: 'navigation.customers',
+      icon: <PeopleIcon />,
+      path: '/customers',
+      roles: ['superadmin', 'admin', 'manager', 'cashier']
     },
-    { 
-      textKey: 'navigation.promotions', 
-      icon: <OffersIcon />, 
-      path: '/promotions', 
-      roles: ['superadmin', 'admin', 'manager'] 
+    {
+      textKey: 'navigation.promotions',
+      icon: <OffersIcon />,
+      path: '/promotions',
+      roles: ['superadmin', 'admin', 'manager']
     },
-    { 
-      textKey: 'navigation.analytics', 
-      icon: <AnalyticsIcon />, 
+    {
+      textKey: 'navigation.analytics',
+      icon: <AnalyticsIcon />,
       path: '/analytics',
       roles: ['superadmin', 'admin', 'manager'],
       children: [
@@ -396,42 +397,42 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
         { textKey: 'navigation.analytics', icon: <AnalyticsIcon />, path: '/analytics', roles: ['superadmin', 'admin', 'manager'] },
       ]
     },
-    { 
-      textKey: 'navigation.settings', 
-      icon: <SettingsIcon />, 
-      path: '/settings', 
-      roles: ['superadmin', 'admin'] 
+    {
+      textKey: 'navigation.settings',
+      icon: <SettingsIcon />,
+      path: '/settings',
+      roles: ['superadmin', 'admin']
     },
   ];
-  
+
   const handleMenuToggle = (key: string) => {
     setExpandedMenus(prev => ({ ...prev, [key]: !prev[key] }));
   };
-  
+
   const isCurrentPath = (path: string) => location.pathname === path;
-  
+
   const getBreadcrumbs = () => {
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const breadcrumbs = [{ name: t('navigation.dashboard'), path: '/' }];
-    
+
     let currentPath = '';
     pathSegments.forEach(segment => {
       currentPath += `/${segment}`;
-      const menuItem = menuItems.find(item => item.path === currentPath) || 
-                      menuItems.flatMap(item => item.children || []).find(child => child.path === currentPath);
+      const menuItem = menuItems.find(item => item.path === currentPath) ||
+        menuItems.flatMap(item => item.children || []).find(child => child.path === currentPath);
       if (menuItem) {
         breadcrumbs.push({ name: t(menuItem.textKey), path: currentPath });
       }
     });
-    
+
     return breadcrumbs;
   };
-  
+
   const renderMenuItem = (item: any, isChild = false) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedMenus[item.textKey];
     const isActive = isCurrentPath(item.path) || (hasChildren && item.children?.some((child: any) => isCurrentPath(child.path)));
-    
+
     return (
       <React.Fragment key={item.textKey}>
         <ListItemButton
@@ -483,11 +484,11 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
             isExpanded ? <ExpandLess /> : <ExpandMore />
           )}
         </ListItemButton>
-        
+
         {hasChildren && (
           <Collapse in={isExpanded && drawerOpen} timeout="auto">
             <List component="div" disablePadding>
-              {item.children.filter((child: any) => child.roles.includes(user?.role || 'guest')).map((child: any) => 
+              {item.children.filter((child: any) => child.roles.includes(user?.role || 'guest')).map((child: any) =>
                 renderMenuItem(child, true)
               )}
             </List>
@@ -496,7 +497,7 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
       </React.Fragment>
     );
   };
-  
+
   return (
     <Box sx={{ display: 'flex' }}>
       {/* Enhanced Sidebar */}
@@ -538,9 +539,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
               exit={{ opacity: 0, x: -20 }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Avatar sx={{ 
-                  bgcolor: 'primary.main', 
-                  width: 40, 
+                <Avatar sx={{
+                  bgcolor: 'primary.main',
+                  width: 40,
                   height: 40,
                   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`
                 }}>
@@ -557,9 +558,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
               </Box>
             </motion.div>
           )}
-          <IconButton 
+          <IconButton
             onClick={() => setDrawerOpen(!drawerOpen)}
-            sx={{ 
+            sx={{
               color: 'text.secondary',
               '&:hover': { color: 'primary.main' }
             }}
@@ -567,9 +568,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
             {drawerOpen ? <ChevronLeftIcon /> : <ChevronRightIcon />}
           </IconButton>
         </Box>
-        
+
         <Divider sx={{ mx: 1 }} />
-        
+
         {/* Navigation Menu */}
         <List sx={{ px: 0, py: 2, flexGrow: 1 }}>
           {menuItems
@@ -577,7 +578,7 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
             .map(item => renderMenuItem(item))
           }
         </List>
-        
+
         {/* User Profile Section */}
         <Box sx={{ p: 2, borderTop: `1px solid ${alpha(theme.palette.divider, 0.12)}` }}>
           {drawerOpen && (
@@ -586,18 +587,18 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
             >
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
                 gap: 2,
                 p: 1.5,
                 borderRadius: 2,
                 background: alpha(theme.palette.primary.main, 0.05),
                 border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`
               }}>
-                <Avatar sx={{ 
-                  width: 36, 
-                  height: 36, 
+                <Avatar sx={{
+                  width: 36,
+                  height: 36,
                   bgcolor: 'primary.main',
                   fontSize: '0.9rem'
                 }}>
@@ -607,16 +608,16 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
                   <Typography variant="subtitle2" noWrap>
                     {user?.first_name || 'User'} {user?.last_name || 'Name'}
                   </Typography>
-                  <Chip 
-                    label={user?.role?.toUpperCase() || 'USER'} 
-                    size="small" 
+                  <Chip
+                    label={user?.role?.toUpperCase() || 'USER'}
+                    size="small"
                     variant="outlined"
-                    sx={{ 
-                      height: 20, 
+                    sx={{
+                      height: 20,
                       fontSize: '0.7rem',
                       borderColor: 'primary.main',
                       color: 'primary.main'
-                    }} 
+                    }}
                   />
                 </Box>
               </Box>
@@ -624,14 +625,14 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
           )}
         </Box>
       </Drawer>
-      
+
       {/* Main Content */}
       <Box component="main" sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         {/* Enhanced Top Bar */}
-        <AppBar 
-          position="sticky" 
+        <AppBar
+          position="sticky"
           elevation={0}
-          sx={{ 
+          sx={{
             backgroundColor: alpha(theme.palette.background.paper, 0.95),
             backdropFilter: 'blur(20px)',
             borderBottom: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
@@ -665,7 +666,7 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
                 ))}
               </Breadcrumbs>
             </Box>
-            
+
             {/* Search Bar */}
             <TextField
               size="small"
@@ -685,10 +686,10 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
                 ),
               }}
             />
-            
+
             {/* Language Selector */}
             <LanguageSelector />
-            
+
             {/* Notifications */}
             <NotificationCenter
               variant="icon"
@@ -698,9 +699,9 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
                 console.log('Notification clicked:', notification);
               }}
             />
-            
+
             {/* User Menu */}
-            <IconButton 
+            <IconButton
               onClick={(e) => setUserMenuAnchor(e.currentTarget)}
               sx={{ p: 0 }}
             >
@@ -709,7 +710,7 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
               </Avatar>
               <KeyboardArrowDown sx={{ ml: 0.5, color: 'text.secondary' }} />
             </IconButton>
-            
+
             <Menu
               anchorEl={userMenuAnchor}
               open={Boolean(userMenuAnchor)}
@@ -734,7 +735,7 @@ const EnhancedLayout: React.FC<{ children: React.ReactNode; user: User | null; o
             </Menu>
           </Toolbar>
         </AppBar>
-        
+
         {/* Page Content */}
         <Box sx={{ flexGrow: 1, p: 3 }}>
           <AnimatePresence mode="wait">
@@ -766,7 +767,7 @@ const App: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [previousLocation, setPreviousLocation] = useState<string | null>(null);
-  
+
   // Navigation logging
   useEffect(() => {
     if (previousLocation && previousLocation !== location.pathname) {
@@ -774,7 +775,7 @@ const App: React.FC = () => {
     }
     setPreviousLocation(location.pathname);
   }, [location.pathname, previousLocation]);
-  
+
   const showNotification = (message: string, severity: 'success' | 'error' | 'warning' | 'info' = 'info') => {
     setSnackbarMessage(message);
     setSnackbarSeverity(severity);
@@ -784,12 +785,12 @@ const App: React.FC = () => {
   // Auto-login on app start
   useEffect(() => {
     let isMounted = true;
-    
+
     const initializeAuth = async () => {
       console.log('🔐 Initializing authentication...');
       const storedToken = localStorage.getItem('token');
       const storedUser = localStorage.getItem('user');
-      
+
       // If we have a stored user but no token, clear the user
       if (storedUser && !storedToken) {
         console.log('🔍 Found stored user but no token, clearing user data');
@@ -799,29 +800,24 @@ const App: React.FC = () => {
         setLoading(false);
         return;
       }
-      
+
       // If we have a stored user and token, try to validate
       if (storedToken) {
         console.log('🔑 Found stored token, validating...');
         try {
-          const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/profile`, {
-            headers: { 
-              'Authorization': `Bearer ${storedToken}`,
-              'Content-Type': 'application/json'
-            }
-          });
-          
-          if (response.ok) {
-            const userData = await response.json();
+          const response = await api.get('/api/auth/profile');
+
+          if (response.status === 200) {
+            const userData = response.data;
             if (isMounted) {
               console.log('✅ Token valid, user authenticated:', userData.username || 'Unknown user');
               logger.info('AUTH', `Token validation successful for user: ${userData.username}`);
               logger.setUserId(userData.id || userData.username);
-              
+
               // Update user data in local storage
               const userToStore = userData.user || userData;
               localStorage.setItem('user', JSON.stringify(userToStore));
-              
+
               setUser(userToStore);
               setToken(storedToken);
             }
@@ -857,7 +853,7 @@ const App: React.FC = () => {
     };
 
     initializeAuth();
-    
+
     // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
@@ -867,40 +863,36 @@ const App: React.FC = () => {
   const handleLogin = async (credentials: { email: string; password: string }) => {
     try {
       console.log('Attempting login with credentials:', credentials.email);
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          username: credentials.email, 
-          password: credentials.password 
-        })
+      const response = await api.post('/api/auth/login', {
+        username: credentials.email,
+        password: credentials.password
       });
 
-      const data = await response.json();
-      
-      if (response.ok && data.token) {
+      const data = response.data;
+
+      if (response.status === 200 && data.token) {
         console.log('Login successful, token received');
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
         setToken(data.token);
         setUser(data.user);
-        
+
         logger.info('AUTH', `Login successful for user: ${credentials.email}`);
         logger.setUserId(data.user?.id || credentials.email);
         logger.userAction('LOGIN', { username: credentials.email, success: true });
-        
+
         // Use a small timeout to ensure state updates before navigation
         setTimeout(() => {
           navigate('/', { replace: true });
         }, 100);
-        
+
         return true;
       } else {
         const errorMessage = data.message || 'Login failed. Please check your credentials.';
         console.error('Login failed:', errorMessage);
-        logger.warn('AUTH', `Login failed for user: ${credentials.email}`, { 
-          status: response.status, 
-          error: errorMessage 
+        logger.warn('AUTH', `Login failed for user: ${credentials.email}`, {
+          status: response.status,
+          error: errorMessage
         });
         logger.userAction('LOGIN_FAILED', { username: credentials.email, error: errorMessage });
         showNotification(errorMessage, 'error');
@@ -1015,7 +1007,7 @@ const App: React.FC = () => {
                           )
                         }
                       />
-                      
+
                       {/* SuperAdmin Routes */}
                       {user?.role === 'superadmin' && (
                         <>
@@ -1026,7 +1018,7 @@ const App: React.FC = () => {
                           <Route path="/superadmin/audit" element={<AuditLog />} />
                         </>
                       )}
-                      
+
                       {/* Regular Agency Routes */}
                       <Route path="/products" element={<Products />} />
                       <Route path="/pos" element={<POS />} />
@@ -1046,12 +1038,12 @@ const App: React.FC = () => {
               }
             />
           </Routes>
-      </AnimatePresence>
-      
-      {/* Development Log Viewer */}
-      <LogViewerFAB />
-      
-    </Box>
+        </AnimatePresence>
+
+        {/* Development Log Viewer */}
+        <LogViewerFAB />
+
+      </Box>
     </ErrorBoundary>
   );
 };
@@ -1127,8 +1119,8 @@ const AppWrapper: React.FC = () => {
         styleOverrides: {
           root: {
             borderRadius: 16,
-            boxShadow: isDarkMode 
-              ? '0 4px 20px 0 rgba(0,0,0,0.3)' 
+            boxShadow: isDarkMode
+              ? '0 4px 20px 0 rgba(0,0,0,0.3)'
               : '0 4px 20px 0 rgba(0,0,0,0.1)',
             border: `1px solid ${isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
           },
