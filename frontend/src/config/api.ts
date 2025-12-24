@@ -32,9 +32,11 @@ if (typeof window !== 'undefined') {
 }
 
 // Only switch to production backend if explicitly configured and not in a local/LAN context
-if (baseURL.includes('your-backend-url')) {
-  baseURL = 'https://backendstocks.onrender.com';
-  console.error('🔧 FIXED: Detected placeholder URL, using configured Render URL');
+if (baseURL.includes('localhost') || baseURL.includes('127.0.0.1')) {
+  // Keep local URL
+} else {
+  baseURL = 'https://backendstocksfinal.onrender.com';
+  console.log('🚀 Using Final Production Backend:', baseURL);
 }
 
 // Debug logging for API config (only in development)
@@ -42,7 +44,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   console.log('🔧 API Configuration:');
   console.log('  REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
   console.log('  Final baseURL:', baseURL);
-  
+
   // Also put it on the window for debugging
   (window as any).DEBUG_API_URL = baseURL;
 }
@@ -56,7 +58,7 @@ const api = axios.create({
 
 // Flag to prevent multiple refresh attempts
 let isRefreshing = false;
-let failedQueue: Array<{resolve: Function, reject: Function}> = [];
+let failedQueue: Array<{ resolve: Function, reject: Function }> = [];
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(({ resolve, reject }) => {
@@ -66,7 +68,7 @@ const processQueue = (error: any, token: string | null = null) => {
       resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -75,12 +77,12 @@ api.interceptors.request.use(
   (config: ExtendedAxiosRequestConfig) => {
     const startTime = Date.now();
     config.metadata = { startTime };
-    
+
     const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     // Log API request
     logger.debug('API_REQUEST', `${config.method?.toUpperCase()} ${config.url}`, {
       method: config.method?.toUpperCase(),
@@ -91,7 +93,7 @@ api.interceptors.request.use(
       params: config.params,
       data: config.data ? JSON.stringify(config.data).substring(0, 500) : undefined
     });
-    
+
     return config;
   },
   (error: AxiosError) => {
@@ -110,7 +112,7 @@ api.interceptors.response.use(
     // Log successful API response
     const config = response.config as ExtendedAxiosRequestConfig;
     const duration = config.metadata?.startTime ? Date.now() - config.metadata.startTime : 0;
-    
+
     logger.logAPI(
       config.method?.toUpperCase() || 'GET',
       config.url || '',
@@ -122,13 +124,13 @@ api.interceptors.response.use(
         cached: response.headers['x-cache'] === 'HIT'
       }
     );
-    
+
     return response;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as ExtendedAxiosRequestConfig & { _retry?: boolean };
     const duration = originalRequest?.metadata?.startTime ? Date.now() - originalRequest.metadata.startTime : 0;
-    
+
     // Log API error
     logger.logAPI(
       originalRequest?.method?.toUpperCase() || 'UNKNOWN',
@@ -146,12 +148,12 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       const errorData = error.response.data as ApiErrorResponse;
-      
+
       // If token is expired, try to refresh it
       if (errorData?.expired && !isRefreshing) {
         isRefreshing = true;
         originalRequest._retry = true;
-        
+
         try {
           const token = localStorage.getItem('token');
           if (token) {
@@ -159,25 +161,25 @@ api.interceptors.response.use(
             const response = await axios.post(`${api.defaults.baseURL}/api/auth/refresh-token`, {}, {
               headers: { Authorization: `Bearer ${token}` }
             });
-            
+
             const newToken = response.data.token;
             localStorage.setItem('token', newToken);
-            
+
             // Update the authorization header
             if (originalRequest.headers) {
               originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
-            
+
             processQueue(null, newToken);
             isRefreshing = false;
-            
+
             // Retry the original request
             return api(originalRequest);
           }
         } catch (refreshError) {
           processQueue(refreshError, null);
           isRefreshing = false;
-          
+
           // Refresh failed, redirect to login
           localStorage.removeItem('token');
           localStorage.removeItem('user');
@@ -203,7 +205,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

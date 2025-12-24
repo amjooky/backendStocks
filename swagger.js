@@ -4,11 +4,11 @@ const swaggerUi = require('swagger-ui-express');
 // Dynamic server configuration based on environment
 const getServers = () => {
   const servers = [];
-  
+
   // In production, prioritize production server
   if (process.env.NODE_ENV === 'production') {
     servers.push({
-      url: 'https://backendstocks.onrender.com',
+      url: 'https://backendstocksfinal.onrender.com',
       description: 'Production server (Render)'
     });
     servers.push({
@@ -22,11 +22,11 @@ const getServers = () => {
       description: 'Development server'
     });
     servers.push({
-      url: 'https://backendstocks.onrender.com',
+      url: 'https://backendstocksfinal.onrender.com',
       description: 'Production server (Render)'
     });
   }
-  
+
   return servers;
 };
 
