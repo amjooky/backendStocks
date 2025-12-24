@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Card, Typography, Button } from '@mui/material';
+import api from '../config/api';
 
 interface DebugAuthProps {
   user: any;
@@ -15,15 +16,14 @@ const DebugAuth: React.FC<DebugAuthProps> = ({ user, token, loading }) => {
 
   const testLogin = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: 'admin', password: 'admin123' })
+      const response = await api.post('/api/auth/login', {
+        username: 'admin',
+        password: 'admin123'
       });
-      
-      const data = await response.json();
+
+      const data = response.data;
       console.log('Login test result:', data);
-      
+
       if (data.token) {
         localStorage.setItem('token', data.token);
         console.log('Token saved:', data.token);
@@ -35,18 +35,10 @@ const DebugAuth: React.FC<DebugAuthProps> = ({ user, token, loading }) => {
   };
 
   const testProfile = async () => {
-    const storedToken = localStorage.getItem('token');
-    if (!storedToken) {
-      console.log('No token found');
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:5000/api/auth/profile', {
-        headers: { Authorization: `Bearer ${storedToken}` }
-      });
-      
-      const data = await response.json();
+      const response = await api.get('/api/auth/profile');
+
+      const data = response.data;
       console.log('Profile test result:', data);
     } catch (error) {
       console.error('Profile test error:', error);
@@ -59,23 +51,23 @@ const DebugAuth: React.FC<DebugAuthProps> = ({ user, token, loading }) => {
         <Typography variant="h6" gutterBottom>
           🔍 Debug Auth State
         </Typography>
-        
+
         <Typography variant="body2" sx={{ mb: 1 }}>
           <strong>Loading:</strong> {loading ? 'Yes' : 'No'}
         </Typography>
-        
+
         <Typography variant="body2" sx={{ mb: 1 }}>
           <strong>Token:</strong> {token ? `${token.substring(0, 20)}...` : 'None'}
         </Typography>
-        
+
         <Typography variant="body2" sx={{ mb: 1 }}>
           <strong>User:</strong> {user ? JSON.stringify(user, null, 2) : 'None'}
         </Typography>
-        
+
         <Typography variant="body2" sx={{ mb: 2 }}>
           <strong>LocalStorage Token:</strong> {localStorage.getItem('token') ? 'Present' : 'None'}
         </Typography>
-        
+
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
           <Button size="small" variant="contained" onClick={testLogin}>
             Test Login
