@@ -10,7 +10,7 @@ const dbPath = path.join(__dirname, '../database/stock_management.db');
 const initializeDatabase = async () => {
     return new Promise((resolve, reject) => {
         console.log('🔄 Initializing database...');
-        
+
         // Ensure database directory exists
         const dbDir = path.dirname(dbPath);
         if (!fs.existsSync(dbDir)) {
@@ -28,8 +28,8 @@ const initializeDatabase = async () => {
         });
 
         db.serialize(() => {
-    // Users table
-    db.run(`CREATE TABLE IF NOT EXISTS users (
+            // Users table
+            db.run(`CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username VARCHAR(50) UNIQUE NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
@@ -42,8 +42,8 @@ const initializeDatabase = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Categories table
-    db.run(`CREATE TABLE IF NOT EXISTS categories (
+            // Categories table
+            db.run(`CREATE TABLE IF NOT EXISTS categories (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -52,8 +52,8 @@ const initializeDatabase = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Suppliers table
-    db.run(`CREATE TABLE IF NOT EXISTS suppliers (
+            // Suppliers table
+            db.run(`CREATE TABLE IF NOT EXISTS suppliers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name VARCHAR(100) NOT NULL,
         contact_person VARCHAR(100),
@@ -65,8 +65,8 @@ const initializeDatabase = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Products table
-    db.run(`CREATE TABLE IF NOT EXISTS products (
+            // Products table
+            db.run(`CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -84,8 +84,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (supplier_id) REFERENCES suppliers (id)
     )`);
 
-    // Inventory table
-    db.run(`CREATE TABLE IF NOT EXISTS inventory (
+            // Inventory table
+            db.run(`CREATE TABLE IF NOT EXISTS inventory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER NOT NULL,
         current_stock INTEGER NOT NULL DEFAULT 0,
@@ -94,8 +94,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
-    // Stock movements table
-    db.run(`CREATE TABLE IF NOT EXISTS stock_movements (
+            // Stock movements table
+            db.run(`CREATE TABLE IF NOT EXISTS stock_movements (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         product_id INTEGER NOT NULL,
         movement_type TEXT CHECK(movement_type IN ('in', 'out', 'adjustment')) NOT NULL,
@@ -111,8 +111,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (user_id) REFERENCES users (id)
     )`);
 
-    // Customers table
-    db.run(`CREATE TABLE IF NOT EXISTS customers (
+            // Customers table
+            db.run(`CREATE TABLE IF NOT EXISTS customers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100),
@@ -124,8 +124,8 @@ const initializeDatabase = async () => {
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Promotions table
-    db.run(`CREATE TABLE IF NOT EXISTS promotions (
+            // Promotions table
+            db.run(`CREATE TABLE IF NOT EXISTS promotions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name VARCHAR(100) NOT NULL,
         description TEXT,
@@ -140,8 +140,8 @@ const initializeDatabase = async () => {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`);
 
-    // Promotion products (for product-specific promotions)
-    db.run(`CREATE TABLE IF NOT EXISTS promotion_products (
+            // Promotion products (for product-specific promotions)
+            db.run(`CREATE TABLE IF NOT EXISTS promotion_products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         promotion_id INTEGER NOT NULL,
         product_id INTEGER NOT NULL,
@@ -149,8 +149,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
-    // Sales table
-    db.run(`CREATE TABLE IF NOT EXISTS sales (
+            // Sales table
+            db.run(`CREATE TABLE IF NOT EXISTS sales (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sale_number VARCHAR(20) UNIQUE NOT NULL,
         customer_id INTEGER,
@@ -167,8 +167,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (cashier_id) REFERENCES users (id)
     )`);
 
-    // Sale items table
-    db.run(`CREATE TABLE IF NOT EXISTS sale_items (
+            // Sale items table
+            db.run(`CREATE TABLE IF NOT EXISTS sale_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sale_id INTEGER NOT NULL,
         product_id INTEGER NOT NULL,
@@ -180,8 +180,8 @@ const initializeDatabase = async () => {
         FOREIGN KEY (product_id) REFERENCES products (id)
     )`);
 
-    // Sale promotions applied
-    db.run(`CREATE TABLE IF NOT EXISTS sale_promotions (
+            // Sale promotions applied
+            db.run(`CREATE TABLE IF NOT EXISTS sale_promotions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sale_id INTEGER NOT NULL,
         promotion_id INTEGER NOT NULL,
@@ -190,8 +190,15 @@ const initializeDatabase = async () => {
         FOREIGN KEY (promotion_id) REFERENCES promotions (id)
     )`);
 
-    // Receipts table
-    db.run(`CREATE TABLE IF NOT EXISTS receipts (
+            // System settings table
+            db.run(`CREATE TABLE IF NOT EXISTS system_settings (
+        setting_key VARCHAR(100) PRIMARY KEY,
+        setting_value TEXT,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`);
+
+            // Receipts table
+            db.run(`CREATE TABLE IF NOT EXISTS receipts (
         id TEXT PRIMARY KEY,
         receiptNumber VARCHAR(50) UNIQUE NOT NULL,
         timestamp DATETIME NOT NULL,
@@ -211,56 +218,69 @@ const initializeDatabase = async () => {
         FOREIGN KEY (customerId) REFERENCES customers (id)
     )`);
 
-    // Indexes for better performance
-    db.run(`CREATE INDEX IF NOT EXISTS idx_products_sku ON products (sku)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_products_barcode ON products (barcode)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_sales_date ON sales (created_at)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_stock_movements_date ON stock_movements (created_at)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_inventory_product ON inventory (product_id)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_receipts_date ON receipts (timestamp)`);
-    db.run(`CREATE INDEX IF NOT EXISTS idx_receipts_number ON receipts (receiptNumber)`);
+            // Indexes for better performance
+            db.run(`CREATE INDEX IF NOT EXISTS idx_products_sku ON products (sku)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_products_barcode ON products (barcode)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_sales_date ON sales (created_at)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_stock_movements_date ON stock_movements (created_at)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_inventory_product ON inventory (product_id)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_receipts_date ON receipts (timestamp)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_receipts_number ON receipts (receiptNumber)`);
 
-    console.log('Database schema created successfully.');
+            console.log('Database schema created successfully.');
 
-    // Insert default admin user
-    const hashedPassword = bcrypt.hashSync('admin123', 10);
-    db.run(`INSERT OR IGNORE INTO users (username, email, password, first_name, last_name, role) 
-            VALUES ('admin', 'admin@stocksystem.com', ?, 'System', 'Administrator', 'admin')`, 
-            [hashedPassword], function(err) {
-        if (err) {
-            console.error('Error creating admin user:', err);
-        } else {
-            console.log('Default admin user created (username: admin, password: admin123)');
-        }
-    });
+            // Insert default admin user
+            const hashedPassword = bcrypt.hashSync('admin123', 10);
+            db.run(`INSERT OR IGNORE INTO users (username, email, password, first_name, last_name, role) 
+            VALUES ('admin', 'admin@stocksystem.com', ?, 'System', 'Administrator', 'admin')`,
+                [hashedPassword], function (err) {
+                    if (err) {
+                        console.error('Error creating admin user:', err);
+                    } else {
+                        console.log('Default admin user created (username: admin, password: admin123)');
+                    }
+                });
 
-    // Insert sample categories
-    const categories = [
-        ['Electronics', 'Electronic devices and accessories'],
-        ['Clothing', 'Apparel and fashion items'],
-        ['Food & Beverages', 'Consumable food and drink products'],
-        ['Books', 'Books and educational materials'],
-        ['Home & Garden', 'Household and garden items']
-    ];
+            // Insert sample categories
+            const categories = [
+                ['Electronics', 'Electronic devices and accessories'],
+                ['Clothing', 'Apparel and fashion items'],
+                ['Food & Beverages', 'Consumable food and drink products'],
+                ['Books', 'Books and educational materials'],
+                ['Home & Garden', 'Household and garden items']
+            ];
 
-    const categoryStmt = db.prepare(`INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)`);
-    categories.forEach(category => {
-        categoryStmt.run(category);
-    });
-    categoryStmt.finalize();
+            const categoryStmt = db.prepare(`INSERT OR IGNORE INTO categories (name, description) VALUES (?, ?)`);
+            categories.forEach(category => {
+                categoryStmt.run(category);
+            });
+            categoryStmt.finalize();
 
-    // Insert sample suppliers
-    const suppliers = [
-        ['Tech Wholesale Co.', 'John Smith', 'john@techwholesale.com', '+1234567890', '123 Tech Street, City'],
-        ['Fashion Distributors', 'Sarah Johnson', 'sarah@fashiondist.com', '+1234567891', '456 Fashion Ave, City'],
-        ['Food & Beverage Supply', 'Mike Brown', 'mike@foodsupply.com', '+1234567892', '789 Supply Rd, City']
-    ];
+            // Insert sample suppliers
+            const suppliers = [
+                ['Tech Wholesale Co.', 'John Smith', 'john@techwholesale.com', '+1234567890', '123 Tech Street, City'],
+                ['Fashion Distributors', 'Sarah Johnson', 'sarah@fashiondist.com', '+1234567891', '456 Fashion Ave, City'],
+                ['Food & Beverage Supply', 'Mike Brown', 'mike@foodsupply.com', '+1234567892', '789 Supply Rd, City']
+            ];
 
-    const supplierStmt = db.prepare(`INSERT OR IGNORE INTO suppliers (name, contact_person, email, phone, address) VALUES (?, ?, ?, ?, ?)`);
-    suppliers.forEach(supplier => {
-        supplierStmt.run(supplier);
-    });
-    supplierStmt.finalize();
+            const supplierStmt = db.prepare(`INSERT OR IGNORE INTO suppliers (name, contact_person, email, phone, address) VALUES (?, ?, ?, ?, ?)`);
+            suppliers.forEach(supplier => {
+                supplierStmt.run(supplier);
+            });
+            supplierStmt.finalize();
+
+            // Insert default system settings
+            const defaultSettings = [
+                ['company_name', 'Stock Management System'],
+                ['tax_rate', '0.0'],
+                ['currency', 'USD'],
+                ['language', 'en']
+            ];
+            const settingsStmt = db.prepare(`INSERT OR IGNORE INTO system_settings (setting_key, setting_value) VALUES (?, ?)`);
+            defaultSettings.forEach(setting => {
+                settingsStmt.run(setting);
+            });
+            settingsStmt.finalize();
 
             console.log('📦 Sample data inserted successfully.');
             console.log('✅ Database initialization completed!');

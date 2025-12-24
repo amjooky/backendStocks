@@ -44,7 +44,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
     customCssUrl: null,
     customJs: null,
     swaggerOptions: {
-        persistAuthorization: true
+        persistAuthorization: true,
+        displayRequestDuration: true
     }
 }));
 
@@ -249,6 +250,39 @@ const ensureNotificationsTable = async () => {
     }
 };
 
+// Ensure system_settings table exists
+const ensureSystemSettingsTable = async () => {
+    try {
+        console.log('⚙️ Ensuring system_settings table is present...');
+        const { runQuery, getAllRows } = require('./config/database');
+
+        await runQuery(`CREATE TABLE IF NOT EXISTS system_settings (
+            setting_key VARCHAR(100) PRIMARY KEY,
+            setting_value TEXT,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        // Insert default settings if empty
+        const countResult = await getAllRows('SELECT COUNT(*) as count FROM system_settings');
+        if (countResult[0].count === 0) {
+            console.log('📝 Inserting default system settings...');
+            const defaults = [
+                ['company_name', 'Stock Management System'],
+                ['tax_rate', '0.0'],
+                ['currency', 'USD'],
+                ['language', 'en']
+            ];
+            for (const [key, value] of defaults) {
+                await runQuery('INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?)', [key, value]);
+            }
+        }
+
+        console.log('✅ System settings table verified.');
+    } catch (err) {
+        console.error('❌ Failed to ensure system settings table:', err.message);
+    }
+};
+
 // Initialize database and start server
 const startServer = async () => {
     try {
@@ -266,6 +300,9 @@ const startServer = async () => {
         // Ensure notifications table exists
         await ensureNotificationsTable();
 
+        // Ensure system_settings table exists
+        await ensureSystemSettingsTable();
+
         // Start server
         app.listen(PORT, () => {
             console.log(`🎯 FULL STOCK MANAGEMENT SYSTEM DEPLOYED SUCCESSFULLY! 🎯`);
@@ -275,7 +312,8 @@ const startServer = async () => {
             console.log(`✅ AUTH API: https://backendstocksfinal.onrender.com/api/auth/login`);
             console.log(`✅ INVENTORY API: https://backendstocksfinal.onrender.com/api/inventory`);
             console.log(`✅ ANALYTICS API: https://backendstocksfinal.onrender.com/api/analytics`);
-            console.log(`📚 API Documentation: https://backendstocksfinal.onrender.com/api-docs`);
+            console.log(`📚 API Documentation (Remote): https://backendstocksfinal.onrender.com/api-docs`);
+            console.log(`📚 API Documentation (Local): http://localhost:${PORT}/api-docs`);
             console.log(`🎉 DEPLOYMENT COMPLETE - ALL SYSTEMS OPERATIONAL!`);
         });
     } catch (error) {
